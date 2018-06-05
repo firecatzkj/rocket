@@ -129,6 +129,5 @@ if __name__ == '__main__':
     #         print(tmp_col, "--", 0)
     #         continue
     #     calc_iv(df, "fpd", tmp_col, cuts)
-
     print(smbinning_test(df, "fpd", "hl_contact_morning_cnt_5m"))
 
