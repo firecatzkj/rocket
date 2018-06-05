@@ -23,10 +23,6 @@ def smbinning_test(df, Y, x):
         max_leaf_nodes=5)
     mytree.fit(x_test, y)
     cutpoint = mytree.tree_.threshold
-    # for i in cutpoint:
-    #     print(i)
-
-    print(mytree.splitter,"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}")
     print(x)
     print(cutpoint)
     print("=====================")
