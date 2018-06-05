@@ -1,0 +1,1 @@
+{"meta": {"project_name": "binningpy", "license": "MIT", "version": "0.0.1", "status": "dev", "url": ""}, "author": {"author": "hsz", "author_email": ""}, "desc": {"keywords": ["tools"], "description": "simple tools"}, "form": {"env": "env", "compiler": "python", "project_form": "model", "template": "simple"}}
