@@ -47,8 +47,8 @@ class Executor(metaclass=ABCMeta):
         clf.fit(train_x, train_y)
         predict_prob_y = clf.predict_proba(test_x)
         predict_prob_y = pd.DataFrame(predict_prob_y, columns=["fpd0", "fpd1"])
-        test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd1"])
-        print(test_auc, ">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd0"])
+        # print(test_auc, ">>>>>>>>>>>>>>>>>>>>>>>>>>>")
         return test_auc
 
     def train_by_feature(self, feature):
@@ -56,7 +56,6 @@ class Executor(metaclass=ABCMeta):
         for single in self.df_splited:
             current_data.append(single[feature])
         # current_data = list(map(lambda x: x[feature], self.df_splited))
-
         result_auc = []
         for i in range(len(current_data)):
             tmp = current_data.copy()
@@ -78,7 +77,8 @@ class Executor(metaclass=ABCMeta):
             fea = self.feature_select(pd.concat(tmp), "fpd")
             feature_list.append(fea)
         for feature in feature_list:
-            self.train_by_feature(feature)
+            res = self.train_by_feature(feature)
+            print(pd.Series(res).mean(), "\t", pd.Series(res).std())
 
     def judge_function(self, auc_mean_weight, auc_std_weight):
         pass
