@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 import pandas as pd
-from sklearn.tree import DecisionTreeRegressor
 from lib.utils import data_split
 from sklearn import metrics
 from abc import abstractclassmethod, ABCMeta
+from tools.mylogger import logger
+from sklearn.tree import DecisionTreeRegressor
+
 
 class Executor(metaclass=ABCMeta):
     def __init__(self, df, y, model):
@@ -43,12 +45,10 @@ class Executor(metaclass=ABCMeta):
         """
         # TODO: 训练模型,使用九份数据训练,在第十份数据上检验,得到相应的AUC,KS,  总共训练10次
         clf = mymodel
-        # clf = DecisionTreeRegressor()
         clf.fit(train_x, train_y)
         predict_prob_y = clf.predict_proba(test_x)
         predict_prob_y = pd.DataFrame(predict_prob_y, columns=["fpd0", "fpd1"])
-        test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd0"])
-        # print(test_auc, ">>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd1"])
         return test_auc
 
     def train_by_feature(self, feature):
@@ -78,7 +78,7 @@ class Executor(metaclass=ABCMeta):
             feature_list.append(fea)
         for feature in feature_list:
             res = self.train_by_feature(feature)
-            print(pd.Series(res).mean(), "\t", pd.Series(res).std())
+            print(pd.Series(res).mean() / pd.Series(res).std())
 
     def judge_function(self, auc_mean_weight, auc_std_weight):
         pass
