@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
 import pandas as pd
+import numpy as np
 from lib.utils import data_split
 from sklearn import metrics
 from abc import abstractclassmethod, ABCMeta
 from tools.mylogger import logger
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeClassifier
 
 
 class Executor(metaclass=ABCMeta):
@@ -49,14 +50,20 @@ class Executor(metaclass=ABCMeta):
         predict_prob_y = clf.predict_proba(test_x)
         predict_prob_y = pd.DataFrame(predict_prob_y, columns=["fpd0", "fpd1"])
         test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd1"])
-        return test_auc
+        left_variables = train_x.columns[np.where(clf.feature_importances_ > 0)].tolist()
+        print(left_variables, "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
+        this_feature_impoirtance = pd.DataFrame(list(zip(train_x.columns, clf.feature_importances_)),
+                                                columns=["variable", "importance"])
+        used_feature_importance = this_feature_impoirtance[this_feature_impoirtance.importance > 0]
+        # print(used_feature_importance)
+        return test_auc, used_feature_importance
 
     def train_by_feature(self, feature):
         current_data = []
         for single in self.df_splited:
             current_data.append(single[feature])
         # current_data = list(map(lambda x: x[feature], self.df_splited))
-        result_auc = []
+        result = []
         for i in range(len(current_data)):
             tmp = current_data.copy()
             test_data = pd.DataFrame(tmp.pop(i))
@@ -65,9 +72,9 @@ class Executor(metaclass=ABCMeta):
             train_y = train_data[self.y]
             test_x = test_data.drop(self.y, axis=1)
             test_y = test_data[self.y]
-            current_auc = self.build_model(self.model, train_x, train_y, test_x, test_y)
-            result_auc.append(current_auc)
-        return result_auc
+            current_res = self.build_model(self.model, train_x, train_y, test_x, test_y)
+            result.append(current_res)
+        return result
 
     def train_all(self):
         feature_list = []
@@ -78,12 +85,16 @@ class Executor(metaclass=ABCMeta):
             feature_list.append(fea)
         for feature in feature_list:
             res = self.train_by_feature(feature)
-            print(pd.Series(res).mean() / pd.Series(res).std())
+            # print(np.array(res))
 
     def judge_function(self, auc_mean_weight, auc_std_weight):
-        pass
+        """
+        1. 测试AUC, KS表现
+        2. 单个变量多次入选B1~B10
+        3. 变量业务逻辑核查
+        :param auc_mean_weight: 
+        :param auc_std_weight: 
+        :return: 
+        """
         # TODO: 对变量集对应的10组测试AUC均值和方差进行评判
-        # 1. 测试AUC, KS表现
-        # 2. 单个变量多次入选B1~B10
-        # 3. 变量业务逻辑核查
-
+        pass
