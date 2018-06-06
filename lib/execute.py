@@ -72,7 +72,7 @@ class Executor:
         for feature in feature_list:
             self.train_by_feature(feature)
 
-    def judge_function(self):
+    def judge_function(self, auc_mean_weight):
         pass
         # TODO: 对变量集对应的10组测试AUC均值和方差进行评判
         # 1. 测试AUC, KS表现
