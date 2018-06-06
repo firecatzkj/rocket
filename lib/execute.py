@@ -16,16 +16,18 @@ class Executor:
         self.df_splited = data_split(df, threads=10, split_flag="split_flag")
         self.model = model
 
-    def feature_select(self, sub_train_set, y, useless):
+    def feature_select(self, sub_train_set, y, *args):
         """
         :param sub_train_set: 数据集
         :param y: target
-        :param useless: 确定需要去除的变量名的列表
+        :param args: 变量初筛选函数,任意个
         :return: 筛选之后的变量名列表
         """
-        sub_train_set = pd.DataFrame(sub_train_set).drop(useless, axis=1)
+        # sub_train_set = pd.DataFrame(sub_train_set).drop(useless, axis=1)
         # TODO: 返回筛选之后的变量列表
         # return columns
+        for i in args:
+            sub_train_set = i(sub_train_set, y)
         return sub_train_set.columns
 
     def build_model(self, mymodel, train_x, train_y, test_x, test_y):
