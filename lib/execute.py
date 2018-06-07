@@ -5,6 +5,7 @@ from lib.utils import data_split
 from sklearn import metrics
 from abc import abstractclassmethod, ABCMeta
 from tools.mylogger import logger
+from lib.judge_funcs import judge_auc_mean_std
 from copy import copy
 from sklearn.tree import DecisionTreeClassifier
 
@@ -87,36 +88,65 @@ class Executor(metaclass=ABCMeta):
             res = self.train_by_feature(feature)
             yield res
 
-    @abstractclassmethod
-    def judge_function(self, result):
+    # @abstractclassmethod
+    # def judge_function_model(self, result):
+    #     """
+    #     模型级别的筛选,筛选出auc均值和方差表现都比较好的模型
+    #     1. 测试AUC, KS表现
+    #     2. 单个变量多次入选B1~B10
+    #     3. 变量业务逻辑核查
+    #     :param: train_all的返回值
+    #     :return:
+    #     """
+    #     # 对变量集对应的10组测试AUC均值和方差进行评判
+    #     pass
+
+    def judge_function_model(self, result):
         """
-        1. 测试AUC, KS表现
-        2. 单个变量多次入选B1~B10
-        3. 变量业务逻辑核查
-        :param: train_all的返回值
+        模型级别的筛选,筛选出auc均值和方差表现都比较好的模型
+        :param result: 
         :return: 
         """
-        # TODO: 对变量集对应的10组测试AUC均值和方差进行评判
-        calc_res = []
-        for model_res in result:
-            current_auc = model_res[0]
-            logger.info(current_auc)
-            var_importance = model_res[1]
-            var_importance["importance_plus"] = var_importance["importance"] * current_auc
-            calc_res.append(var_importance)
-        return pd.concat(calc_res)
+        result = [i for i in result]
+        model_score = []
+        for i in result:
+            current_auc_list = np.array(i)[:, 0]
+            score = judge_auc_mean_std(current_auc_list.mean(), current_auc_list.std())
+            model_score.append(score)
+        best_model_index = pd.Series(model_score).idxmax()
+        return result[best_model_index]
+
+    def judge_function_variable(self, single_result):
+        """
+        变量级别的筛选,在选择出最好的模型之后,再选择最好的变量
+            - 单个变量在10组数据中出现的次数
+        :param single_result: 
+        :return: 
+        """
+        single_result = np.array(single_result)
+        var_df = pd.concat(single_result[:, 1])
+        var_df = pd.DataFrame(var_df)
+        var_result = {}
+        for var_name, _ in var_df.groupby(by="variable"):
+            var_result[var_name] = len(_)
+        return pd.Series(var_result).sort_values(ascending=False)
 
     def get_result(self):
-        final_result = []
-        for i in self.train_all():
-            final_result.append(self.judge_function(i))
-        final_result = pd.concat(final_result)
-        final_result = pd.DataFrame(final_result)
-        res = {}
-        for var, df in final_result.groupby(by="variable"):
-            auc_p_imp = df["importance_plus"].sum()
-            res[var] = auc_p_imp
-        return pd.Series(res).sort_values(ascending=False)
+        model_result = self.judge_function_model(self.train_all())
+        var_result = self.judge_function_variable(model_result)
+        return var_result
+
+    # def get_result(self):
+    #     final_result = []
+    #     for i in self.train_all():
+    #         final_result.append(self.judge_function(i))
+    #     final_result = pd.concat(final_result)
+    #     final_result = pd.DataFrame(final_result)
+    #     res = {}
+    #     for var, df in final_result.groupby(by="variable"):
+    #         auc_p_imp = df["importance_plus"].sum()
+    #         res[var] = auc_p_imp
+    #     return pd.Series(res).sort_values(ascending=False)
 
 
 

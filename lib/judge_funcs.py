@@ -6,7 +6,7 @@ import pandas as pd
 from tools.mylogger import logger
 
 
-def judge_function(result):
+def judge_function_v1(result):
     """
     1. 测试AUC, KS表现
     2. 单个变量多次入选B1~B10
@@ -23,3 +23,16 @@ def judge_function(result):
         var_importance["importance_plus"] = var_importance["importance"] * current_auc
         calc_res.append(var_importance)
     return pd.concat(calc_res)
+
+
+def judge_auc_mean_std(auc_mean, auc_std):
+    """
+    :param auc_mean: 10组auc的均值
+    :param auc_std: 10组auc的方差
+    :return: 评判结果 
+    ? 评判结果:
+        - 目前返回AUC的均值除以AUC的方差
+        - 后续需要做归一化的处理
+        - e ^ (auc_mean - auc_std ?)
+    """
+    return round(auc_mean / auc_std, 8)
