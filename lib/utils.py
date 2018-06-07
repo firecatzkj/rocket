@@ -139,10 +139,9 @@ def calc_iv(df, Y, x, cuts):
     return result
 
 
-
-
 if __name__ == '__main__':
     df = pd.read_csv("..\\data\\hl_test_clean.csv")
+    print(len(df), ">>>>>>>>>>>>>>>>>>>>>>")
     res = data_split(df, 10, "flag")
     for i in res:
         print(len(i))

@@ -11,18 +11,18 @@ from lib.select_funcs import drop_useless
 class MyExecutor(Executor):
     def feature_select(self, sub_train_set, y):
         tmp = drop_useless(sub_train_set, 'pre_apply_no', 'book_date', 'book_mon')
-        # tmp = [
-        #     "hl_phone_silent_frequentcy",
-        #     "hl_contact_early_morning_cnt_5m",
-        #     "hl_transactions_min_5m",
-        #     "hl_contact_night_pct",
-        #     "hl_region_call_out_cnt_max_avg_call_in_time",
-        #     "hl_transactions_total_amt_5m",
-        #     "hl_call_cnt_mid_2m",
-        #     "hl_contact_bank_callout_len_total",
-        #     "fpd"
-        # ]
         return tmp
+
+    def judge_function(self, result):
+        """
+        1. 测试AUC, KS表现
+        2. 单个变量多次入选B1~B10
+        3. 变量业务逻辑核查
+        :param: train_all的返回值
+        :return: 
+        """
+        # TODO: 对变量集对应的10组测试AUC均值和方差进行评判
+
 
 
 def main():

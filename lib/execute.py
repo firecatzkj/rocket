@@ -15,7 +15,6 @@ class Executor(metaclass=ABCMeta):
         :param df: 数据集
         :param y: target
         :param model: sklearn模型对象
-        :param filter_funcs: 变量初筛的方法 ==> list
         """
         self.y = y
         self.df_splited = data_split(df, threads=10, split_flag="split_flag")
@@ -88,6 +87,7 @@ class Executor(metaclass=ABCMeta):
             res = self.train_by_feature(feature)
             yield res
 
+    @abstractclassmethod
     def judge_function(self, result):
         """
         1. 测试AUC, KS表现
