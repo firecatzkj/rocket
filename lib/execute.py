@@ -5,6 +5,7 @@ from lib.utils import data_split
 from sklearn import metrics
 from abc import abstractclassmethod, ABCMeta
 from tools.mylogger import logger
+from copy import copy
 from sklearn.tree import DecisionTreeClassifier
 
 
@@ -51,7 +52,7 @@ class Executor(metaclass=ABCMeta):
         predict_prob_y = pd.DataFrame(predict_prob_y, columns=["fpd0", "fpd1"])
         test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd1"])
         left_variables = train_x.columns[np.where(clf.feature_importances_ > 0)].tolist()
-        print(left_variables, "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
+        logger.info(left_variables)
         this_feature_impoirtance = pd.DataFrame(list(zip(train_x.columns, clf.feature_importances_)),
                                                 columns=["variable", "importance"])
         used_feature_importance = this_feature_impoirtance[this_feature_impoirtance.importance > 0]
@@ -85,16 +86,40 @@ class Executor(metaclass=ABCMeta):
             feature_list.append(fea)
         for feature in feature_list:
             res = self.train_by_feature(feature)
-            # print(np.array(res))
+            yield res
 
-    def judge_function(self, auc_mean_weight, auc_std_weight):
+    def judge_function(self, result):
         """
         1. 测试AUC, KS表现
         2. 单个变量多次入选B1~B10
         3. 变量业务逻辑核查
-        :param auc_mean_weight: 
-        :param auc_std_weight: 
+        :param: train_all的返回值
         :return: 
         """
         # TODO: 对变量集对应的10组测试AUC均值和方差进行评判
-        pass
+        calc_res = []
+        for model_res in result:
+            current_auc = model_res[0]
+            logger.info(current_auc)
+            var_importance = model_res[1]
+            var_importance["importance_plus"] = var_importance["importance"] * current_auc
+            calc_res.append(var_importance)
+        return pd.concat(calc_res)
+
+    def get_result(self):
+        final_result = []
+        for i in self.train_all():
+            final_result.append(self.judge_function(i))
+        final_result = pd.concat(final_result)
+        final_result = pd.DataFrame(final_result)
+        res = {}
+        for var, df in final_result.groupby(by="variable"):
+            auc_p_imp = df["importance_plus"].sum()
+            res[var] = auc_p_imp
+        return pd.Series(res).sort_values(ascending=False)
+
+
+
+
+
+

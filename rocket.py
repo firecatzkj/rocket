@@ -10,7 +10,19 @@ from lib.select_funcs import drop_useless
 
 class MyExecutor(Executor):
     def feature_select(self, sub_train_set, y):
-        return drop_useless(sub_train_set, 'pre_apply_no', 'book_date', 'book_mon')
+        tmp = drop_useless(sub_train_set, 'pre_apply_no', 'book_date', 'book_mon')
+        # tmp = [
+        #     "hl_phone_silent_frequentcy",
+        #     "hl_contact_early_morning_cnt_5m",
+        #     "hl_transactions_min_5m",
+        #     "hl_contact_night_pct",
+        #     "hl_region_call_out_cnt_max_avg_call_in_time",
+        #     "hl_transactions_total_amt_5m",
+        #     "hl_call_cnt_mid_2m",
+        #     "hl_contact_bank_callout_len_total",
+        #     "fpd"
+        # ]
+        return tmp
 
 
 def main():
@@ -21,7 +33,7 @@ def main():
         min_samples_split=0.05,
     )
     myexe = MyExecutor(df, "fpd", clf)
-    myexe.train_all()
+    print(myexe.get_result())
 
 
 if __name__ == '__main__':
