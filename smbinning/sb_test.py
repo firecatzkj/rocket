@@ -1,23 +1,27 @@
+# -*- coding:utf-8 -*- 
 # -*- coding:utf-8 -*-
 import os
 import pandas as pd
 import math
-from tools.mylogger import logger
+import numpy as np
 from copy import copy
 from sklearn import tree
 
 
-def smbinning(df, Y, x):
+def smbinning_test(df, Y, x):
     y = df[Y]
     x_test = df[[x, ]]
     mytree = tree.DecisionTreeClassifier(
         max_features=1,
         min_weight_fraction_leaf=0.05,
-        # min_samples_split=0.05,
-        # criterion="entropy",
-        max_leaf_nodes=3)
+        min_samples_split=0.05,
+        criterion="entropy",
+        max_leaf_nodes=5)
     mytree.fit(x_test, y)
     cutpoint = mytree.tree_.threshold
+    print(x)
+    print(cutpoint)
+    print("=====================")
     cutpoint = cutpoint[cutpoint != -2]
     cutpoint.sort()
     return cutpoint
@@ -25,6 +29,7 @@ def smbinning(df, Y, x):
 
 def calc_columns(single_result, tmp, Y, df):
     single_result["total"] = len(tmp)
+    #print("total is {}".format(len(tmp)))
     single_result["good"] = len(tmp[tmp[Y] == 0])
     single_result["bad"] = len(tmp[tmp[Y] == 1])
     single_result["goodDistr"] = round((single_result["good"] / len(df[df[Y] == 0])), 6)
@@ -49,13 +54,8 @@ def calc_columns(single_result, tmp, Y, df):
     return copy(single_result)
 
 
-def calc_iv(df, Y, x, cuts=None):
-    #logger.info("Calc IV with {}".format(x))
+def calc_iv(df, Y, x, cuts):
     # 排序很重要,因为后面算区间的时候需要索引+1 -1
-    if cuts is None:
-        cuts = smbinning(df, Y, x)
-        if len(cuts) == 0:
-            return None, None
     cuts = list(cuts)
     cuts.sort()
     single_sample = df[[Y, x]]
@@ -107,10 +107,10 @@ def calc_iv(df, Y, x, cuts=None):
     single_result_total = calc_columns(copy(base_single_result), tmp_total, Y, df)
     single_result_total["cutpoints"] = "Total"
     single_result_total["IV"] = round(result["IV"].sum(), 6)
-    # print(x, "--", single_result_total["IV"])
+    print(x, "--", single_result_total["IV"])
     result = result.append(pd.DataFrame([single_result_total, ]))[[
         "cutpoints", "total", "good", "bad", "goodDistr", "badDistr", "distr", "badRate", "Odds", "WOE", "IV"]]
-    return result, single_result_total["IV"]
+    return result
 
 
 if __name__ == '__main__':
@@ -131,5 +131,18 @@ if __name__ == '__main__':
     # print(smbinning_test(df, "fpd", "hl_phone_silent_frequentcy"))
     # print(calc_iv(df, "fpd", "hl_phone_silent_frequentcy", [0.00638984, 0.08657658, 0.01671322]))
 
-    print(smbinning(df, "fpd", "hl_contact_holiday_cnt_5m"))
-    # print(calc_iv(df, "fpd", "hl_phone_num_used_time_months", [0.00638984, 0.08657658, 0.01671322]))
+    print(smbinning_test(df, "fpd", "hl_contact_morning_cnt_5m"))
+    
+    
+    res = calc_iv(df, "fpd", "hl_contact_morning_cnt_5m",
+                  [  119.5, 212.5, 243.5, 553.5]
+                  )
+    
+    
+    
+    
+    
+    
+    
+    
+    
