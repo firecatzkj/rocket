@@ -43,7 +43,6 @@ def main():
         max_depth=4,
         min_samples_split=0.05,
     )
-
     myexe = MyExecutor(df, "fpd", clf)
     print(myexe.get_result())
 
