@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import pandas as pd
 import numpy as np
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from lib.execute import Executor
 from tools.mylogger import logger
