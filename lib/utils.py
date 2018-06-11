@@ -5,6 +5,8 @@ from sklearn.utils import shuffle
 from tools.mylogger import logger
 from copy import copy
 from sklearn import tree
+from scipy import stats
+from sklearn.metrics import *
 
 
 # 随机打乱数据
@@ -42,7 +44,7 @@ def smbinning_test(df, Y, x):
     x_test = df[[x, ]]
     mytree = tree.DecisionTreeClassifier(
         max_features=1,
-        #min_weight_fraction_leaf=0.05,
+        # min_weight_fraction_leaf=0.05,
         min_samples_split=0.05,
         criterion="entropy",
         max_leaf_nodes=5)
@@ -137,6 +139,42 @@ def calc_iv(df, Y, x, cuts):
     result = result.append(pd.DataFrame([single_result_total, ]))[[
         "cutpoints", "total", "good", "bad", "goodDistr", "badDistr", "distr", "badRate", "Odds", "WOE", "IV"]]
     return result
+
+
+def getReport(model, trainSet, X_train_ask, y_train_ask, testSet, X_test_ask, y_test_ask):
+    print('结论:')
+    print(model.show_models())
+    print('==================================================')
+    print(model.sprint_statistics())
+    print('==================================================')
+
+    print('训练集ks')
+    X_pred = model.predict_proba(X_train_ask)
+    trainSet['prob'] = X_pred[:, 1]
+    good = trainSet[trainSet['fpd'] == 0]
+    bad = trainSet[trainSet['fpd'] == 1]
+    trainKS = stats.ks_2samp(good['prob'], bad['prob']).statistic
+    print(trainKS)
+    print('测试集ks')
+    y_pred = model.predict_proba(X_test_ask)
+    testSet['prob'] = y_pred[:, 1]
+    good = testSet[testSet['fpd'] == 0]
+    bad = testSet[testSet['fpd'] == 1]
+    testKS = stats.ks_2samp(good['prob'], bad['prob']).statistic
+    print(testKS)
+    print('KS之差为:' + str(trainKS - testKS))
+    print('==================================================')
+
+    print('训练集auc')
+    trainAUC = roc_auc_score(y_train_ask, trainSet['prob'])
+    print(trainAUC)
+    print('测试集auc')
+    testAUC = roc_auc_score(y_test_ask, testSet['prob'])
+    print(testAUC)
+    print('AUC之差为:' + str(trainAUC - testAUC))
+    print('==================================================')
+    print('')
+    return trainKS, testKS, (trainKS - testKS), trainAUC, testAUC, (trainAUC - testAUC)
 
 
 if __name__ == '__main__':
