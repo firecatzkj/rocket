@@ -6,6 +6,9 @@ from lib.execute import Executor
 from tools.mylogger import logger
 from lib.select_funcs import drop_useless, drop_by_iv
 from lib.judge_funcs import judge_auc_mean_std
+from lib.utils import getReport
+import autosklearn.classification
+from autosklearn.metrics import *
 
 
 class MyExecutor(Executor):
@@ -30,6 +33,10 @@ class MyExecutor(Executor):
 
 def main():
     df = pd.read_csv("data/hl_test_clean.csv", encoding="utf8")
+    df['book_date'] = pd.to_datetime(df['book_date'])
+    trainSet = df[(df['book_date'] >= '2017-04-01') & (df['book_date'] <= '2017-07-20')].reset_index(drop=True)
+    testSet = df[(df['book_date'] >= '2017-07-20') & (df['book_date'] <= '2017-08-31')].reset_index(drop=True)
+
     logger.info("============================Data is ready!============================")
     # clf = DecisionTreeClassifier(
     #     # max_features=4,
@@ -45,6 +52,23 @@ def main():
     )
     myexe = MyExecutor(df, "fpd", clf)
     print(myexe.get_result())
+    leftVaris = myexe.get_result()
+    X_train = trainSet[leftVaris].copy()
+    y_train = trainSet['fpd'].copy()
+    X_test = testSet[leftVaris].copy()
+    y_test = testSet[leftVaris].copy()
+
+    # AutoSklearn阶段:
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=62,
+        per_run_time_limit=60,
+        include_estimators=['adaboost'],
+        resampling_strategy='holdout',
+        resampling_strategy_arguments={'train_size': 0.67}
+    )
+
+    cls.fit(X_train, y_train, metric=roc_auc)
+    getReport(cls, trainSet, X_train, y_train, testSet, X_test, y_test)
 
 
 if __name__ == '__main__':
