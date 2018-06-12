@@ -45,8 +45,10 @@ def main():
         min_samples_split=0.05,
     )
     myexe = MyExecutor(df, "fpd", clf)
-    print(myexe.get_result())
+    #print(myexe.get_result())
+
     leftVaris = myexe.get_result()
+    leftVaris = leftVaris[leftVaris.values > 7].keys()
     X_train = trainSet[leftVaris].copy()
     y_train = trainSet['fpd'].copy()
     X_test = testSet[leftVaris].copy()
