@@ -31,12 +31,6 @@ class MyExecutor(Executor):
 def main():
     df = pd.read_csv("data/hl_test_clean.csv", encoding="utf8")
     logger.info("============================Data is ready!============================")
-    # clf = DecisionTreeClassifier(
-    #     # max_features=4,
-    #     # min_weight_fraction_leaf=0.05,
-    #     min_samples_split=0.05,
-    #     max_leaf_nodes=20
-    # )
     clf = RandomForestClassifier(
         n_estimators=10,
         max_features=10,
