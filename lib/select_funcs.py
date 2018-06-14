@@ -36,11 +36,13 @@ def drop_by_iv(df, y, p=6):
     #         "IV": calc_iv(df, y, col)[1]
     #     }
     #     result.append(copy(tmp))
+
     logger.info("Start filter variables by IV, Current thread: {}".format(p))
     pool = Pool(processes=p)
-
     for col in columns:
         result.append(pool.apply_async(calc_iv, args=(df, y, col)))
+    pool.close()
+    pool.join()
     result = pd.DataFrame([s.get() for s in result])
     selected_vars = list(result[result.IV >= 0.02]["columns"])
     selected_vars.append("fpd")
