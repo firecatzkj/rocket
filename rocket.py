@@ -7,8 +7,8 @@ from tools.mylogger import logger
 from lib.select_funcs import drop_useless, drop_by_iv
 from lib.judge_funcs import judge_auc_mean_std
 from lib.utils import getReport
-# import autosklearn.classification
-# from autosklearn.metrics import *
+import autosklearn.classification
+from autosklearn.metrics import *
 from sklearn import metrics
 
 
@@ -52,14 +52,14 @@ def main():
     X_test = testSet[leftVaris].copy()
     y_test = testSet[leftVaris].copy()
     # AutoSklearn阶段:
-    # cls = autosklearn.classification.AutoSklearnClassifier(
-    #     time_left_for_this_task=62,
-    #     per_run_time_limit=60,
-    #     include_estimators=['adaboost'],
-    #     resampling_strategy='holdout',
-    #     resampling_strategy_arguments={'train_size': 0.67}
-    # )
-    # getReport(cls, trainSet, X_train, y_train, testSet, X_test, y_test)
+    cls = autosklearn.classification.AutoSklearnClassifier(
+        time_left_for_this_task=62,
+        per_run_time_limit=60,
+        include_estimators=['adaboost'],
+        resampling_strategy='holdout',
+        resampling_strategy_arguments={'train_size': 0.67}
+    )
+    getReport(cls, trainSet, X_train, y_train, testSet, X_test, y_test)
 
 
 if __name__ == '__main__':
