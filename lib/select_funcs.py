@@ -3,10 +3,10 @@
 User Define Feature Select Function
 """
 import pandas as pd
-from tqdm import tqdm
-from copy import copy
+from tools.mylogger import logger
 from smbinning.smbinning import calc_iv
 from sklearn.preprocessing import *
+from multiprocessing import Pool
 
 
 def drop_useless(df, *useless):
@@ -19,23 +19,29 @@ def drop_useless(df, *useless):
     return df.columns
 
 
-def drop_by_iv(df, y):
+def drop_by_iv(df, y, p=6):
     """
     select variables by information value
     :param df: 
     :param y:
+    :param p: 线程数, < cpu核数/线程数
     :return: 
     """
     columns = list(df.columns)
     result = []
     # print(columns)
-    for col in tqdm(columns):
-        tmp = {
-            "columns": col,
-            "IV": calc_iv(df, y, col)[1]
-        }
-        result.append(copy(tmp))
-    result = pd.DataFrame(result)
+    # for col in tqdm(columns):
+    #     tmp = {
+    #         "columns": col,
+    #         "IV": calc_iv(df, y, col)[1]
+    #     }
+    #     result.append(copy(tmp))
+    logger.info("Start filter variables by IV, Current thread: {}".format(p))
+    pool = Pool(processes=p)
+
+    for col in columns:
+        result.append(pool.apply_async(calc_iv, args=(df, y, col)))
+    result = pd.DataFrame([s.get() for s in result])
     selected_vars = list(result[result.IV >= 0.02]["columns"])
     selected_vars.append("fpd")
     return selected_vars

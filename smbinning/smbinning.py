@@ -55,7 +55,7 @@ def calc_iv(df, Y, x, cuts=None):
     if cuts is None:
         cuts = smbinning(df, Y, x)
         if len(cuts) == 0:
-            return None, None
+            return {"columns": x, "IV": None}
     cuts = list(cuts)
     cuts.sort()
     single_sample = df[[Y, x]]
@@ -110,7 +110,9 @@ def calc_iv(df, Y, x, cuts=None):
     # print(x, "--", single_result_total["IV"])
     result = result.append(pd.DataFrame([single_result_total, ]))[[
         "cutpoints", "total", "good", "bad", "goodDistr", "badDistr", "distr", "badRate", "Odds", "WOE", "IV"]]
-    return result, single_result_total["IV"]
+    # return result, {x: single_result_total["IV"]}
+
+    return {"columns": x, "IV": single_result_total["IV"]}
 
 
 if __name__ == '__main__':
@@ -131,5 +133,5 @@ if __name__ == '__main__':
     # print(smbinning_test(df, "fpd", "hl_phone_silent_frequentcy"))
     # print(calc_iv(df, "fpd", "hl_phone_silent_frequentcy", [0.00638984, 0.08657658, 0.01671322]))
 
-    print(smbinning(df, "fpd", "hl_contact_holiday_cnt_5m"))
+    print(calc_iv(df, "fpd", "hl_contact_holiday_cnt_5m"))
     # print(calc_iv(df, "fpd", "hl_phone_num_used_time_months", [0.00638984, 0.08657658, 0.01671322]))
