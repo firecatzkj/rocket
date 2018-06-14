@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e494e16a-2fd1-4810-b39a-11f41855546e" name="localMachine" url="http://10.5.33.111">
+        <fileTransfer host="10.5.33.111" port="22" rootFolder="/home/zjh/codes" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
