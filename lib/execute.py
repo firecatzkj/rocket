@@ -135,21 +135,3 @@ class Executor(metaclass=ABCMeta):
         model_result = self.judge_function_model(self.train_all())
         var_result = self.judge_function_variable(model_result)
         return var_result
-
-    # def get_result(self):
-    #     final_result = []
-    #     for i in self.train_all():
-    #         final_result.append(self.judge_function(i))
-    #     final_result = pd.concat(final_result)
-    #     final_result = pd.DataFrame(final_result)
-    #     res = {}
-    #     for var, df in final_result.groupby(by="variable"):
-    #         auc_p_imp = df["importance_plus"].sum()
-    #         res[var] = auc_p_imp
-    #     return pd.Series(res).sort_values(ascending=False)
-
-
-
-
-
-

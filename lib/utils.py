@@ -142,11 +142,11 @@ def calc_iv(df, Y, x, cuts):
 
 
 def getReport(model, trainSet, X_train_ask, y_train_ask, testSet, X_test_ask, y_test_ask):
-    print('结论:')
-    print(model.show_models())
-    print('==================================================')
-    print(model.sprint_statistics())
-    print('==================================================')
+    # print('结论:')
+    # print(model.show_models())
+    # print('==================================================')
+    # print(model.sprint_statistics())
+    # print('==================================================')
 
     print('训练集ks')
     X_pred = model.predict_proba(X_train_ask)

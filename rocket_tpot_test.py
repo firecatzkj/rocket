@@ -1,17 +1,14 @@
 # -*- coding:utf-8 -*-
 import pandas as pd
 import numpy as np
-#from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 from lib.execute import Executor
 from tools.mylogger import logger
 from lib.select_funcs import drop_useless, drop_by_iv
 from lib.judge_funcs import judge_auc_mean_std
 from lib.utils import getReport
-import autosklearn.classification
-from autosklearn.metrics import *
 from sklearn import metrics
-
+from tpot import TPOTClassifier
 
 class MyExecutor(Executor):
     def feature_select(self, sub_train_set, y):
@@ -39,7 +36,7 @@ def main():
     trainSet = df[(df['book_date'] >= '2017-04-01') & (df['book_date'] <= '2017-07-20')].reset_index(drop=True)
     testSet = df[(df['book_date'] >= '2017-07-20') & (df['book_date'] <= '2017-08-31')].reset_index(drop=True)
     logger.info("============================Data is ready!============================")
-    clf = XGBClassifier(
+    clf = RandomForestClassifier(
         n_estimators=10,
         max_features=10,
         max_depth=4,
@@ -48,20 +45,22 @@ def main():
     myexe = MyExecutor(df, "fpd", clf)
     leftVaris = myexe.get_result()
     leftVaris = leftVaris[leftVaris.values > 7].keys()
+
     X_train = trainSet[leftVaris].copy()
     y_train = trainSet['fpd'].copy()
     X_test = testSet[leftVaris].copy()
     y_test = testSet['fpd'].copy()
     # AutoSklearn阶段:
-    cls = autosklearn.classification.AutoSklearnClassifier(
-        time_left_for_this_task=62,
-        per_run_time_limit=60,
-        include_estimators=['adaboost'],
-        resampling_strategy='holdout',
-        resampling_strategy_arguments={'train_size': 0.67}
-    )
-    getReport(cls, trainSet, X_train, y_train, testSet, X_test, y_test)
-
+    pipeline_optimizer = TPOTClassifier(generations=5,
+                                        population_size=10,
+                                        cv=4,
+                                        random_state=42,
+                                        n_jobs=1,
+                                        verbosity=2)
+    pipeline_optimizer.fit(X_train, y_train)
+    # print(pipeline_optimizer.score(X_test, y_test))
+    pipeline_optimizer.export('tpot_exported_pipeline.py')
+    getReport(pipeline_optimizer, trainSet, X_train, y_train, testSet, X_test, y_test)
 
 if __name__ == '__main__':
     main()
