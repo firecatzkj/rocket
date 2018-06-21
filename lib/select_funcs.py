@@ -19,7 +19,7 @@ def drop_useless(df, *useless):
     return df.columns
 
 
-def drop_by_iv(df, y, p=6):
+def drop_by_iv(df, y, p=10):
     """
     select variables by information value
     :param df: 

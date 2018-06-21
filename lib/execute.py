@@ -103,35 +103,35 @@ class Executor(metaclass=ABCMeta):
 
     def judge_function_model(self, result):
         """
-        模型级别的筛选,筛选出auc均值和方差表现都比较好的模型
         :param result: 
         :return: 
         """
-        result = [i for i in result]
-        model_score = []
-        for i in result:
-            current_auc_list = np.array(i)[:, 0]
-            score = judge_auc_mean_std(current_auc_list.mean(), current_auc_list.std())
-            model_score.append(score)
-        best_model_index = pd.Series(model_score).idxmax()
-        return result[best_model_index]
+        pass
+        # result = [i for i in result]
+        # model_score = []
+        # for i in result:
+        #     current_auc_list = np.array(i)[:, 0]
+        #     score = judge_auc_mean_std(current_auc_list.mean(), current_auc_list.std())
+        #     model_score.append(score)
+        # best_model_index = pd.Series(model_score).idxmax()
+        # return result[best_model_index]
 
-    def judge_function_variable(self, single_result):
+    def get_variable_cnt(self, single_result):
+        single_result = np.array(single_result)
+        # var_df = pd.concat(single_result[:, 1])
+        var_df = pd.DataFrame(single_result[1])
+        var_result = []
+        for var_name, _ in var_df.groupby(by="variable"):
+            tmp = {}
+            tmp["variable"] = var_name
+            tmp["cnt"] = len(_)
+            var_result.append(copy(tmp))
+        return pd.DataFrame(var_result)
+
+    def get_result(self, n_var):
         """
-        变量级别的筛选,在选择出最好的模型之后,再选择最好的变量
-            - 单个变量在10组数据中出现的次数
-        :param single_result: 
+        随judge_function按情况重写
         :return: 
         """
-        single_result = np.array(single_result)
-        var_df = pd.concat(single_result[:, 1])
-        var_df = pd.DataFrame(var_df)
-        var_result = {}
-        for var_name, _ in var_df.groupby(by="variable"):
-            var_result[var_name] = len(_)
-        return pd.Series(var_result).sort_values(ascending=False)
-
-    def get_result(self):
-        model_result = self.judge_function_model(self.train_all())
-        var_result = self.judge_function_variable(model_result)
+        var_result = self.judge_function_model(self.train_all(), n_var)
         return var_result
