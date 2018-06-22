@@ -45,8 +45,6 @@ class MyExecutor(Executor):
             var_weight_collection.append(single_var_res)
         var_weight_collection = pd.concat(var_weight_collection)
 
-        print(var_weight_collection.columns)
-        var_weight_collection.to_csv("var_w_collection.csv")
         var_weight_result = []
         for ss in var_weight_collection.groupby(by="variable"):
             tmp = {
