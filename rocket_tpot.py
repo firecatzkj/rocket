@@ -15,11 +15,10 @@ class MyExecutor(Executor):
     def feature_select(self, sub_train_set, y):
         logger.info("Start filer Variables total: {}".format(len(sub_train_set.columns)))
         tmp1 = drop_useless(sub_train_set, 'pre_apply_no', 'book_date', 'book_mon')
-        return tmp1
-        # sub_train_set = sub_train_set[tmp1]
-        # tmp2 = drop_by_iv(sub_train_set, "fpd", 2)
-        # logger.info("Stop filter Variables total: {}".format(len(tmp2)))
-        #return tmp2
+        sub_train_set = sub_train_set[tmp1]
+        tmp2 = drop_by_iv(sub_train_set, "fpd", 2)
+        logger.info("Stop filter Variables total: {}".format(len(tmp2)))
+        return tmp2
 
     def judge_function_model(self, result, n_var):
         """
@@ -61,10 +60,14 @@ class MyExecutor(Executor):
 
 
 def main():
-    df = pd.read_csv("data/hl_test_clean.csv", encoding="utf8")
-    df['book_date'] = pd.to_datetime(df['book_date'])
-    trainSet = df[(df['book_date'] >= '2017-04-01') & (df['book_date'] <= '2017-07-20')].reset_index(drop=True)
-    testSet = df[(df['book_date'] >= '2017-07-20') & (df['book_date'] <= '2017-08-31')].reset_index(drop=True)
+    df = pd.read_csv("data/model_mix/clean_data.csv", encoding="utf8")
+    trainSet = df[
+        df["book_mon"].isin(['2017-05', '2017-06', '2017-07'])
+    ].reset_index(drop=True)
+    testSet = df[
+        df["book_mon"] == "2017-08"
+    ].reset_index(drop=True)
+
     logger.info("============================Data is ready!============================")
     clf = RandomForestClassifier(
         n_estimators=10,
