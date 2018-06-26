@@ -53,6 +53,7 @@ class Executor(metaclass=ABCMeta):
         test_auc = metrics.roc_auc_score(test_y, predict_prob_y["fpd1"])
         left_variables = train_x.columns[np.where(clf.feature_importances_ > 0)].tolist()
         logger.info(left_variables)
+        logger.info(len(left_variables))
         this_feature_impoirtance = pd.DataFrame(list(zip(train_x.columns, clf.feature_importances_)),
                                                 columns=["variable", "importance"])
         used_feature_importance = this_feature_impoirtance[this_feature_impoirtance.importance > 0]
