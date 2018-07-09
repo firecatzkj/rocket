@@ -37,39 +37,38 @@ def ks_score(model, X_train, y_train):
 
 
 def run():
-    df = pd.read_csv("../data/model_mix/clean_data.csv", encoding="utf8")
+    df = pd.read_csv("../analysis/clean_data_filtered.csv", encoding="utf8")
     trainSet = df[
         df["book_mon"].isin(['2017-05', '2017-06', '2017-07'])
     ].reset_index(drop=True)
-    testSet = df[
-        df["book_mon"] == "2017-08"
+
+    # 这里不一样,训练集用过滤过噪声的,测试集用原来的样本
+    df_test = pd.read_csv("../data/model_mix/clean_data.csv", encoding="utf8")
+    testSet = df_test[
+        df_test["book_mon"] == "2017-08"
         ].reset_index(drop=True)
+
     leftVaris = [
-        "CRD_LINE_SUM",
-        "CRD_CNT_TOP1AMT_3M",
-        "td_cnt_all_1m",
-        "hl_contact_noon_cnt_5m",
-        "td_cnt_all_1m_mode_1w",
-        "CRD_LINE_MAX",
-        "hl_contact_afternoon_cnt_5m",
-        "hl_transactions_total_amt_5m",
-        "hl_contact_bank_callout_len_avg",
-        "hl_contact_early_morning_cnt_5m",
-        "hl_phone_silent_frequentcy",
-        "td_cnt_all_3m",
-        "hl_contact_bank_callout_len_total",
-        "td_ip_cnt_deviceid_1m",
-        "hl_contact_morning_cnt_5m",
-        "hl_transactions_max_2m",
         "hl_contact_bank_callin_cnt_avg",
-        "hl_contact_linkman_midnight_cnt_pct_2m",
-        "hl_region_call_cnt_max_avg_callout_time",
-        "hl_region_call_out_cnt_max_avg_call_out_time",
-        "hl_region_call_cnt_max_callout_cnt",
-        "hl_region_unique_num_max_avg_call_in_time",
+        "td_cnt_offloan_1m",
         "hl_call_early_morning_pct_5m",
-        "hl_person_age",
-        "hl_region_call_in_time_max_call_in_time"
+        "hl_transactions_min_2m",
+        "hl_call_cnt_avg_5m",
+        "hl_call_domesitc_cnt_2m",
+        "hl_transactions_total_amt_5m",
+        "hl_region_call_out_cnt_max_avg_call_out_time",
+        "hl_contact_loan_callout_len_avg",
+        "hl_contact_linkman_callin_cnt_pct_5m",
+        "credit",
+        "CRD_LINE_SUM",
+        "CRD_CNT_INTEGRAL_000_CSM_3M",
+        "hl_call_cnt_mid_5m",
+        "hl_contact_bank_callin_cnt_total",
+        "hl_callin_len_avg_5m",
+        "hl_call_domesitc_cnt_5m",
+        "hl_transactions_max_2m",
+        "CRD_LINE_MAX",
+        "hl_smses_send_cnt_5m"
     ]
     X_train = trainSet[leftVaris].copy()
     y_train = trainSet['fpd'].copy()
@@ -112,9 +111,6 @@ def run():
     # print(grid_search.best_params_)
     # print(grid_search.best_score_)
 
-
-    ##################################################
-
     model.fit(X_train, y_train)
     getReport(model, trainSet, X_train, y_train, testSet, X_test, y_test)
 
@@ -122,3 +118,15 @@ def run():
 if __name__ == '__main__':
     # 设置boosting迭代计算次数
     run()
+
+    # 训练集ks
+    # 0.458162015571691
+    # 测试集ks
+    # 0.15044400557941692
+    # KS之差为: 0.30771800999227406
+
+    # 训练集ks
+    # 0.5449479722330581
+    # 测试集ks
+    # 0.08852490712480493
+    # : 0.4564230651082532KS之差为

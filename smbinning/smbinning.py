@@ -121,8 +121,8 @@ if __name__ == '__main__':
 
     # res = calc_iv(df, "fpd", "hl_region_call_out_time_max_avg_call_in_time", [0.8074, 0.8759, 0.9665])
     # print(res)
-    # cols = open("col", "r+").readlines()
-    # for c in cols:
+    # cols.py = open("col", "r+").readlines()
+    # for c in cols.py:
     #     tmp_col = str(c).strip()
     #     cuts = smbinning_test(df, "fpd", tmp_col)
     #     if len(cuts) == 0:

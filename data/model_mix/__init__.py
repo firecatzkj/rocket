@@ -50,13 +50,13 @@ def clean_data():
             continue
         mydata[col].replace(-99999, None, inplace=True)
         mydata[col].replace(-2, -2.000001, inplace=True)
-        try:
-            mydata[col] = mydata[col].fillna(mydata[col].mean())
-        except:
-            print(col)
+        # try:
+        #     mydata[col] = mydata[col].fillna(mydata[col].mean())
+        # except:
+        #     print(col)
 
     # 存为csv格式
-    mydata.to_csv("clean_data.csv", index=False, encoding="utf8")
+    mydata.to_csv("clean_data_new.csv", index=False, encoding="utf8")
 
 
 def get_data():
