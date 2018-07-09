@@ -5,7 +5,7 @@ from lib.utils import data_split
 from sklearn import metrics
 from abc import abstractclassmethod, ABCMeta
 from tools.mylogger import logger
-from lib.judge_funcs import judge_auc_mean_std
+from lib.judge_funcs import judge_auc_mean
 from copy import copy
 from sklearn.tree import DecisionTreeClassifier
 
@@ -102,20 +102,50 @@ class Executor(metaclass=ABCMeta):
     #     # 对变量集对应的10组测试AUC均值和方差进行评判
     #     pass
 
-    def judge_function_model(self, result):
+    def judge_function_model(self, result, n_var):
         """
-        :param result: 
-        :return: 
+        变量筛选方法:
+            对原有框架的几个环节做出如下改变：
+            1. 将原来组与组之间用于比较的评分score,从计算方式上由"AUC平均值/AUC标准差",改为"AUC平均值"
+            2. 将最后选取参数的评价指标由"score * 变量出现次数count"，改为"score * sum(Feature_Importance)"
+        :param result: 结果集
+        :param n_var: 筛选出的变量的个数
+        :return: 筛选出来的变量
         """
-        pass
-        # result = [i for i in result]
-        # model_score = []
-        # for i in result:
-        #     current_auc_list = np.array(i)[:, 0]
-        #     score = judge_auc_mean_std(current_auc_list.mean(), current_auc_list.std())
-        #     model_score.append(score)
-        # best_model_index = pd.Series(model_score).idxmax()
-        # return result[best_model_index]
+        result = [i for i in result]
+        model_score = []
+        for i in result:
+            current_auc_list = np.array(i)[:, 0]
+            score = judge_auc_mean(current_auc_list.mean())
+            model_score.append(score)
+        model_score_sum = sum(model_score)
+        model_weight = list(map(lambda x: round(x / model_score_sum, 8), model_score))
+        var_weight_collection = []
+        for mw, single_res in zip(model_weight, result):
+            single_var_res = self.get_variable_importance_sum(single_res[1])
+            single_var_res["var_weignt"] = single_var_res["cnt"] * mw
+            var_weight_collection.append(single_var_res)
+        var_weight_collection = pd.concat(var_weight_collection)
+
+        var_weight_result = []
+        for ss in var_weight_collection.groupby(by="variable"):
+            tmp = {
+                "variable": ss[0],
+                "weight_sum": ss[1]["var_weignt"].sum()
+            }
+            var_weight_result.append(copy(tmp))
+        var_weight_result = pd.DataFrame(var_weight_result).sort_values(by="weight_sum", ascending=False)
+        return var_weight_result["variable"][0: n_var]
+
+    def get_variable_importance_sum(self, single_result):
+        var_df = pd.DataFrame(single_result[1])
+        var_result = []
+        for var_name, imp in var_df.groupby(by="variable"):
+            tmp = {}
+            tmp["variable"] = var_name
+            tmp["cnt"] = pd.DataFrame(imp)["importance"].sum()
+            var_result.append(copy(tmp))
+        return pd.DataFrame(var_result)
 
     def get_variable_cnt(self, single_result):
         single_result = np.array(single_result)

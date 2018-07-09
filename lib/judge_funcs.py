@@ -36,3 +36,12 @@ def judge_auc_mean_std(auc_mean, auc_std):
         - e ^ (auc_mean - auc_std ?)
     """
     return round(auc_mean / auc_std, 8)
+
+
+def judge_auc_mean(auc_mean):
+    """
+    评判方法: AUC平均值
+    :param auc_mean: 
+    :return: 
+    """
+    return auc_mean
